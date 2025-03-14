@@ -1,0 +1,12 @@
+# traefik.yml
+entryPoints:
+  web:
+    address: ":80"
+
+providers:
+  docker:
+    exposedByDefault: false
+
+api:
+  dashboard: true
+  insecure: true  # 允许通过HTTP访问Dashboard

@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  tcm-robot-app:
+    build: .
+    image: tcm-robot-app:latest
+    container_name: tcm-robot-app
+    ports:
+      - "5000:5000"
+    networks:
+      - tcm-network
+
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - ./traefik.yml:/etc/traefik/traefik.yml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - tcm-network
+    command:
+      - --api.insecure=true
+      - --providers.docker
+      - --providers.file.filename=/etc/traefik/traefik.yml  # 显式指定配置文件
+
+
+networks:
+  tcm-network:
