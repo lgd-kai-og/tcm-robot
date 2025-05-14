@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 中医机器人系统 (TCM Robot System)
 
 基于Docker容器技术的中医智能问诊系统，提供辨证分析与调理建议。
@@ -67,15 +66,7 @@ docker-compose up -d
 
 ```bash
 # 对API密钥进行Base64编码
-DEEPSEEK_KEY_BASE64=$(echo -n "sk-e0eb4c2cc5f742269d13223dac47050d" | base64)
 
-# 设置环境变量
-set DEEPSEEK_KEY_BASE64=$DEEPSEEK_KEY_BASE64
-
-# 应用密钥配置
-envsubst < kubernetes/manifests/secrets.yaml | kubectl apply -f -
-```
-powershell方案：
 # 1. 定义你的 API 密钥明文
 $apiKeyPlainText = "sk-e0eb4c2cc5f742269d13223dac47050d"
 
@@ -112,7 +103,8 @@ Write-Host "-----------------------------"
 #    确保 kubectl 已经配置好并能连接到您的 Kubernetes 集群
 $processedSecretContent | kubectl apply -f -
 2. 部署持久卷：
-
+   kubectl delete pvc tcm-model-pvc
+   kubectl delete pvc redis-data-pvc
 ```bash
 kubectl apply -f kubernetes/manifests/volumes.yaml
 ```
@@ -124,7 +116,8 @@ kubectl apply -f kubernetes/manifests/services.yaml
 kubectl apply -f kubernetes/manifests/deployment.yaml
 ```
 kubectl get service tcm-frontend-service
-http://10.106.201.125
+kubectl port-forward service/tcm-frontend-service 8080:80
+http://127.0.0.1:8080
 
 
 cd E:\houduan\tcm-robot
@@ -151,8 +144,76 @@ docker-compose up -d
 docker ps
 
 docker-compose ps
-=======
-# tcm-robot
-tcm-robot
->>>>>>> 5778939b503bfcada0c9fd2cf535302f5799a271
-# 已更新
+
+cd E:/houduan/tcm-robot
+git init
+git add .
+git commit -m "初始提交"
+git remote add origin https://github.com/lgd-kai-og/tcm-robot.git
+git pull origin main --allow-unrelated-histories
+git branch -M main
+git push -u origin main
+三、在GitHub中设置密钥
+访问仓库设置
+进入你的GitHub仓库
+点击顶部菜单的"Settings"（齿轮图标）
+在左侧菜单中，滚动找到并点击"Secrets and variables"
+点击子菜单中的"Actions"
+添加新密钥
+点击绿色的"New repository secret"按钮
+添加以下密钥（每个单独添加）：
+DOCKER_USERNAME
+Name: DOCKER_USERNAME
+Value: 你的Docker Hub用户名
+点击"Add secret"
+DOCKER_PASSWORD
+Name: DOCKER_PASSWORD
+Value: 你的Docker Hub密码
+点击"Add secret"
+DEEPSEEK_KEY
+Name: DEEPSEEK_KEY
+Value: 你的DeepSeek API密钥（例如：sk-e0eb4c2cc5f742269d13223dac47050d）
+点击"Add secret"
+     # 确保你已登录到Kubernetes集群
+     # 获取配置并进行Base64编码
+     [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes((Get-Content -Raw ~/.kube/config)))
+获取Kubernetes配置
+在PowerShell中执行：
+Apply to README.md
+复制生成的长字符串（不要有任何空格或换行）
+添加KUBE_CONFIG密钥
+回到GitHub仓库的"Secrets and variables" > "Actions"页面
+点击"New repository secret"
+Name: KUBE_CONFIG
+Value: 粘贴刚才复制的Base64字符串
+点击"Add secret"
+五、触发和监控CI/CD流程
+验证工作流文件
+确认你的仓库中已包含.github/workflows/ci-cd.yml文件
+此文件是我们之前创建的CI/CD配置
+手动触发工作流（可选）
+进入仓库的"Actions"标签页
+在左侧找到"TCM Robot CI/CD Pipeline"
+点击"Run workflow"下拉菜单
+点击绿色的"Run workflow"按钮
+自动触发工作流
+任何推送到main分支的更改都会自动触发工作流
+
+ # 在本地修改一个文件，例如README.md
+     echo "# 已更新" >> README.md
+     
+     # 提交并推送
+     git add README.md
+     git commit -m "更新README以触发CI/CD"
+     git push
+监控部署进度
+进入仓库的"Actions"标签页
+你会看到一个正在运行的工作流
+点击该工作流查看详细进度
+每个步骤旁边会显示状态（成功是绿色对勾，失败是红色叉）
+点击任何步骤可以展开查看详细日志
+检查部署状态
+工作流完成后，登录到你的Kubernetes集群
+执行以下命令查看部署状态：
+    kubectl get pods
+    kubectl get services
