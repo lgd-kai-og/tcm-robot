@@ -200,7 +200,7 @@ Value: 粘贴刚才复制的Base64字符串
 任何推送到main分支的更改都会自动触发工作流
 
  # 在本地修改一个文件，例如README.md
-     echo "# 已更新" >> README.md
+     echo "# 已更新1" >> README.md
      
      # 提交并推送
      git add README.md
@@ -216,4 +216,5 @@ Value: 粘贴刚才复制的Base64字符串
 工作流完成后，登录到你的Kubernetes集群
 执行以下命令查看部署状态：
     kubectl get pods
-    kubectl get services
+    kubectl get services# 已更新
+# 已更新1
