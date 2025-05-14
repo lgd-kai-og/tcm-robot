@@ -1,7 +1,9 @@
 # traefik.yml
 entryPoints:
   web:
-    address: ":80"
+    address: ":8080"
+  websecure:
+    address: ":443"
 
 providers:
   docker:

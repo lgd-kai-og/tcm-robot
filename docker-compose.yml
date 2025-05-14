@@ -1,31 +1,90 @@
 version: '3.8'
 
 services:
-  tcm-robot-app:
-    build: .
-    image: tcm-robot-app:latest
-    container_name: tcm-robot-app
+  # 交互层: Vue.js前端
+  frontend:
+    build: ./frontend
+    image: tcm-robot-web:1.2
+    container_name: tcm-frontend
     ports:
-      - "5000:5000"
+      - "8080:80"
+    environment:
+      - API_GATEWAY=http://gateway:8000
+    depends_on:
+      - gateway
     networks:
       - tcm-network
 
-  traefik:
-    image: traefik:v2.10
-    container_name: traefik
+  # 服务层: Spring Boot微服务
+  backend:
+    build: ./backend
+    image: tcm-robot-backend:latest
+    container_name: tcm-backend
+    environment:
+      - DEEPSEEK_KEY=${DEEPSEEK_KEY}
+    volumes:
+      - tcm-knowledge:/app/knowledge
+    depends_on:
+      - redis
+    networks:
+      - tcm-network
+
+  # 智能层: NLP处理服务
+  nlp-service:
+    build: ./nlp-service
+    image: tcm-nlp-processor:2.1
+    container_name: tcm-nlp-service
+    volumes:
+      - tcm-model:/app/models
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+    networks:
+      - tcm-network
+
+  # API网关
+  gateway:
+    image: traefik:v2.6
+    container_name: tcm-gateway
     ports:
-      - "80:80"
-      - "8080:8080"
+      - "8000:8080"
+      - "8443:443"
     volumes:
       - ./traefik.yml:/etc/traefik/traefik.yml
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:8080"
     networks:
       - tcm-network
-    command:
-      - --api.insecure=true
-      - --providers.docker
-      - --providers.file.filename=/etc/traefik/traefik.yml  # 显式指定配置文件
 
+  # 缓存优化: Redis缓存
+  redis:
+    build: ./redis
+    image: tcm-redis:latest
+    container_name: tcm-redis
+    volumes:
+      - redis-data:/data
+    networks:
+      - tcm-network
+
+  # 知识库更新容器
+  knowledge-updater:
+    build: ./knowledge-updater
+    image: tcm-knowledge-updater:latest
+    volumes:
+      - tcm-knowledge:/tcm_knowledge
+    restart: unless-stopped
+    networks:
+      - tcm-network
+
+volumes:
+  tcm-knowledge:
+  tcm-model:
+  redis-data:
 
 networks:
   tcm-network:
+    driver: bridge

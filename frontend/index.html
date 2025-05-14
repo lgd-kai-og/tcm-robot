@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中医机器人智能问诊系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h1>中医机器人智能问诊系统</h1>
+        </header>
+        <main class="consultation-container">
+            <div class="chat-window">
+                <div class="message-list" id="messageList">
+                    <div class="message robot">
+                        <div class="message-content">您好，我是中医智能问诊机器人。请描述您的症状，我将为您提供中医辨证分析和调理建议。</div>
+                        <div class="message-time" id="initial-time"></div>
+                    </div>
+                </div>
+                <div class="input-area">
+                    <textarea id="userInput" placeholder="请描述您的症状..."></textarea>
+                    <button id="sendButton">发送</button>
+                </div>
+            </div>
+            <div class="diagnosis-panel" id="diagnosisPanel" style="display: none;">
+                <h3>辨证分析结果</h3>
+                <div class="result-card">
+                    <div class="result-item">
+                        <span class="item-label">体质类型:</span>
+                        <span class="item-value" id="bodyType"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="item-label">主要证型:</span>
+                        <span class="item-value" id="mainSyndrome"></span>
+                    </div>
+                    <div class="result-item diagnosis-suggestions">
+                        <span class="item-label">调理建议:</span>
+                        <div class="suggestions-list" id="suggestionsList">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html> 

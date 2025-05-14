@@ -1,0 +1,31 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: tcm-robot-backend
+  redis:
+    host: redis
+    port: 6379
+    database: 0
+    timeout: 60000
+
+deepseek:
+  api:
+    key: ${DEEPSEEK_KEY}
+    url: https://api.deepseek.cn/v1/chat/completions
+    model: tcm-pro-1.0
+
+logging:
+  level:
+    root: INFO
+    cn.tcmrobot: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/tcm-robot.log
+    max-size: 10MB
+    max-history: 7 

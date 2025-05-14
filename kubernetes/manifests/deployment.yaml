@@ -1,0 +1,185 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tcm-frontend
+  labels:
+    app: tcm-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tcm-frontend
+  template:
+    metadata:
+      labels:
+        app: tcm-frontend
+    spec:
+      containers:
+      - name: tcm-frontend
+        image: tcm-robot-web:1.2
+        ports:
+        - containerPort: 80
+        env:
+        - name: API_GATEWAY
+          value: http://tcm-gateway-service:8000
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tcm-backend
+  labels:
+    app: tcm-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tcm-backend
+  template:
+    metadata:
+      labels:
+        app: tcm-backend
+    spec:
+      containers:
+      - name: tcm-backend
+        image: tcm-robot-backend:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DEEPSEEK_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tcm-api-keys
+              key: deepseek-key
+        volumeMounts:
+        - name: tcm-knowledge-volume
+          mountPath: /app/knowledge
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+      volumes:
+      - name: tcm-knowledge-volume
+        persistentVolumeClaim:
+          claimName: tcm-knowledge-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tcm-nlp-service
+  labels:
+    app: tcm-nlp-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tcm-nlp-service
+  template:
+    metadata:
+      labels:
+        app: tcm-nlp-service
+    spec:
+      containers:
+      - name: tcm-nlp-service
+        image: tcm-nlp-processor:2.1
+        volumeMounts:
+        - name: tcm-model-volume
+          mountPath: /app/models
+        resources:
+          limits:
+            cpu: '2'
+            memory: 4G
+          requests:
+            cpu: '1'
+            memory: 2G
+      volumes:
+      - name: tcm-model-volume
+        persistentVolumeClaim:
+          claimName: tcm-model-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tcm-redis
+  labels:
+    app: tcm-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tcm-redis
+  template:
+    metadata:
+      labels:
+        app: tcm-redis
+    spec:
+      containers:
+      - name: redis
+        image: tcm-redis:latest
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-data-volume
+          mountPath: /data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: redis-data-volume
+        persistentVolumeClaim:
+          claimName: redis-data-pvc
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: tcm-knowledge-updater
+spec:
+  schedule: "0 3 * * *"  # 每天凌晨3点执行
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: knowledge-updater
+            image: tcm-knowledge-updater:latest
+            volumeMounts:
+            - name: tcm-knowledge-volume
+              mountPath: /tcm_knowledge
+          volumes:
+          - name: tcm-knowledge-volume
+            persistentVolumeClaim:
+              claimName: tcm-knowledge-pvc
+          restartPolicy: OnFailure
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: tcm-diagnosis-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: tcm-backend
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Pods
+    pods:
+      metric:
+        name: custom_metric_consultations_per_min
+      target:
+        type: AverageValue
+        averageValue: 50 
