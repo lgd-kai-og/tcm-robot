@@ -9,6 +9,7 @@ on:
 env:
   REGISTRY: docker.io
   VERSION: ${{ github.sha }}
+  DOCKER_USERNAME: "17882286232"
 
 jobs:
   build-and-push:
@@ -23,43 +24,43 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: "17882286232"
+          password: "Qq13724965045"
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v2
         with:
           context: ./frontend
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/tcm-robot-web:${{ env.VERSION }}, ${{ secrets.DOCKER_USERNAME }}/tcm-robot-web:latest
+          tags: 17882286232/tcm-robot-web:${{ env.VERSION }}, 17882286232/tcm-robot-web:latest
 
       - name: Build and push backend image
         uses: docker/build-push-action@v2
         with:
           context: ./backend
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/tcm-robot-backend:${{ env.VERSION }}, ${{ secrets.DOCKER_USERNAME }}/tcm-robot-backend:latest
+          tags: 17882286232/tcm-robot-backend:${{ env.VERSION }}, 17882286232/tcm-robot-backend:latest
 
       - name: Build and push NLP service image
         uses: docker/build-push-action@v2
         with:
           context: ./nlp-service
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/tcm-nlp-processor:${{ env.VERSION }}, ${{ secrets.DOCKER_USERNAME }}/tcm-nlp-processor:latest
+          tags: 17882286232/tcm-nlp-processor:${{ env.VERSION }}, 17882286232/tcm-nlp-processor:latest
 
       - name: Build and push Redis image
         uses: docker/build-push-action@v2
         with:
           context: ./redis
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/tcm-redis:${{ env.VERSION }}, ${{ secrets.DOCKER_USERNAME }}/tcm-redis:latest
+          tags: 17882286232/tcm-redis:${{ env.VERSION }}, 17882286232/tcm-redis:latest
 
       - name: Build and push knowledge updater image
         uses: docker/build-push-action@v2
         with:
           context: ./knowledge-updater
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/tcm-knowledge-updater:${{ env.VERSION }}, ${{ secrets.DOCKER_USERNAME }}/tcm-knowledge-updater:latest
+          tags: 17882286232/tcm-knowledge-updater:${{ env.VERSION }}, 17882286232/tcm-knowledge-updater:latest
 
   deploy:
     needs: build-and-push
@@ -85,11 +86,11 @@ jobs:
       - name: Update Kubernetes manifests with new image tags
         run: |
           # 更新镜像标签
-          sed -i "s|tcm-robot-web:1.2|${{ secrets.DOCKER_USERNAME }}/tcm-robot-web:${{ env.VERSION }}|g" kubernetes/manifests/deployment.yaml
-          sed -i "s|tcm-robot-backend:latest|${{ secrets.DOCKER_USERNAME }}/tcm-robot-backend:${{ env.VERSION }}|g" kubernetes/manifests/deployment.yaml
-          sed -i "s|tcm-nlp-processor:2.1|${{ secrets.DOCKER_USERNAME }}/tcm-nlp-processor:${{ env.VERSION }}|g" kubernetes/manifests/deployment.yaml
-          sed -i "s|tcm-redis:latest|${{ secrets.DOCKER_USERNAME }}/tcm-redis:${{ env.VERSION }}|g" kubernetes/manifests/deployment.yaml
-          sed -i "s|tcm-knowledge-updater:latest|${{ secrets.DOCKER_USERNAME }}/tcm-knowledge-updater:${{ env.VERSION }}|g" kubernetes/manifests/deployment.yaml
+          sed -i "s|tcm-robot-web:1.2|17882286232/tcm-robot-web:${{ env.VERSION }}|g" kubernetes/manifests/deployment.yaml
+          sed -i "s|tcm-robot-backend:latest|17882286232/tcm-robot-backend:${{ env.VERSION }}|g" kubernetes/manifests/deployment.yaml
+          sed -i "s|tcm-nlp-processor:2.1|17882286232/tcm-nlp-processor:${{ env.VERSION }}|g" kubernetes/manifests/deployment.yaml
+          sed -i "s|tcm-redis:latest|17882286232/tcm-redis:${{ env.VERSION }}|g" kubernetes/manifests/deployment.yaml
+          sed -i "s|tcm-knowledge-updater:latest|17882286232/tcm-knowledge-updater:${{ env.VERSION }}|g" kubernetes/manifests/deployment.yaml
 
       - name: Deploy to Kubernetes
         run: |
