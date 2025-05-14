@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 中医机器人系统 (TCM Robot System)
 
 基于Docker容器技术的中医智能问诊系统，提供辨证分析与调理建议。
@@ -150,3 +151,7 @@ docker-compose up -d
 docker ps
 
 docker-compose ps
+=======
+# tcm-robot
+tcm-robot
+>>>>>>> 5778939b503bfcada0c9fd2cf535302f5799a271
